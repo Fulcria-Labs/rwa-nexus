@@ -1,0 +1,32 @@
+{
+  "name": "rwa-nexus",
+  "version": "1.0.0",
+  "description": "AI-Powered Real World Asset Intelligence Platform for BNB Chain",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest --forceExit",
+    "test:contracts": "npx hardhat test",
+    "compile": "npx hardhat compile",
+    "deploy:testnet": "npx hardhat run scripts/deploy.ts --network bscTestnet",
+    "demo": "ts-node examples/demo.ts",
+    "dashboard": "ts-node src/dashboard/server.ts"
+  },
+  "keywords": ["rwa", "real-world-assets", "bnb-chain", "ai", "oracle", "tokenization"],
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.28.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.6.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "ethers": "^6.13.0"
+  }
+}
