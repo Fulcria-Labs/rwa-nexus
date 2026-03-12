@@ -71,7 +71,7 @@ Tokenizing real-world assets is one of Web3's biggest opportunities, but a criti
 # Install
 npm install
 
-# Run tests (239 passing)
+# Run tests (1155 passing)
 npm test
 
 # Compile smart contracts
@@ -97,7 +97,7 @@ npm run demo
 - **Solidity** 0.8.24 / Hardhat / OpenZeppelin
 - **ethers.js** v6 for BNB Chain interaction
 - **MCP SDK** for AI system integration
-- **239 tests** across 14 test suites
+- **1155 tests** across 42 test suites
 
 ## Deployment
 
