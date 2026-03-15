@@ -14,6 +14,15 @@ Tokenizing real-world assets is one of Web3's biggest opportunities, but a criti
 - **AI-Powered LTV** — Lending terms dynamically adjust based on oracle confidence scores
 - **MCP Integration** — Any AI system can interact with RWA Nexus via 5 MCP tools
 
+## Demo
+
+```bash
+# Run the multi-agent valuation pipeline demo
+npm run demo
+```
+
+The demo initializes all 3 AI agents, valuates a diversified portfolio (Manhattan penthouse, Hong Kong commercial space, gold reserves, crude oil, treasuries, corporate bonds), and displays consensus values with confidence scores.
+
 ## Architecture
 
 ```
