@@ -43,6 +43,8 @@ contract RWALending is ERC1155Holder, Ownable {
     uint256 public highConfidenceLTV = 7000;  // 70% LTV for high-confidence valuations
     uint256 public confidenceThreshold = 8000; // 80% confidence needed for higher LTV
     uint256 public baseInterestRate = 500;    // 5% annual
+    uint256 public liquidationThreshold = 9000; // 90% — loan is liquidatable when debt >= 90% of collateral value
+    uint256 public liquidationBonus = 500;     // 5% bonus for liquidators
     uint256 public nextLoanId;
 
     mapping(uint256 => Loan) public loans;
@@ -116,6 +118,78 @@ contract RWALending is ERC1155Holder, Ownable {
         }
 
         emit LoanRepaid(loanId, msg.sender, totalDue);
+    }
+
+    /**
+     * @notice Liquidate an undercollateralized loan.
+     *         Anyone can call this when the loan's debt exceeds the liquidation threshold
+     *         of the collateral's current oracle value. The liquidator pays the outstanding
+     *         debt and receives the collateral tokens plus a liquidation bonus.
+     * @param loanId The loan to liquidate
+     * @param oracleAssetId The oracle asset ID for price lookup
+     */
+    function liquidate(uint256 loanId, bytes32 oracleAssetId) external payable {
+        Loan storage loan = loans[loanId];
+        require(loan.active, "Loan not active");
+
+        (uint256 value,, uint256 lastUpdated) = oracle.getPrice(oracleAssetId);
+        require(value > 0, "No oracle price available");
+        require(block.timestamp - lastUpdated < 1 days, "Oracle price too stale");
+
+        // Current collateral value in wei
+        uint256 collateralValue = (value * loan.collateralAmount) / 1e18;
+
+        // Total debt = principal + accrued interest
+        uint256 interest = _calculateInterest(loan);
+        uint256 totalDebt = loan.loanAmount + interest;
+
+        // Loan is liquidatable when debt >= liquidationThreshold% of collateral value
+        // i.e., totalDebt * 10000 >= collateralValue * liquidationThreshold
+        require(
+            totalDebt * 10000 >= collateralValue * liquidationThreshold,
+            "Loan not undercollateralized"
+        );
+
+        // Liquidator pays the total debt
+        require(msg.value >= totalDebt, "Insufficient liquidation payment");
+
+        loan.active = false;
+
+        // Transfer collateral to liquidator
+        rwaToken.safeTransferFrom(address(this), msg.sender, loan.tokenId, loan.collateralAmount, "");
+
+        // Refund excess payment
+        if (msg.value > totalDebt) {
+            payable(msg.sender).transfer(msg.value - totalDebt);
+        }
+
+        emit LoanLiquidated(loanId, msg.sender);
+    }
+
+    /**
+     * @notice Check whether a loan is currently liquidatable.
+     * @param loanId The loan to check
+     * @param oracleAssetId The oracle asset ID for price lookup
+     * @return liquidatable Whether the loan can be liquidated
+     * @return totalDebt The total amount owed (principal + interest)
+     * @return collateralValue The current value of the collateral
+     */
+    function isLiquidatable(uint256 loanId, bytes32 oracleAssetId) external view returns (
+        bool liquidatable,
+        uint256 totalDebt,
+        uint256 collateralValue
+    ) {
+        Loan storage loan = loans[loanId];
+        if (!loan.active) return (false, 0, 0);
+
+        (uint256 value,, uint256 lastUpdated) = oracle.getPrice(oracleAssetId);
+        if (value == 0 || block.timestamp - lastUpdated >= 1 days) return (false, 0, 0);
+
+        collateralValue = (value * loan.collateralAmount) / 1e18;
+        uint256 interest = _calculateInterest(loan);
+        totalDebt = loan.loanAmount + interest;
+
+        liquidatable = (totalDebt * 10000 >= collateralValue * liquidationThreshold);
     }
 
     function _calculateInterest(Loan storage loan) internal view returns (uint256) {

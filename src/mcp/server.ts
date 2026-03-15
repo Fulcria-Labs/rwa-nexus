@@ -1,10 +1,11 @@
 import { ConsensusEngine } from '../oracle/consensus';
 import { ChainBridge } from '../oracle/chain-bridge';
-import { AssetClass, AssetData, ConsensusResult } from '../types';
+import { analyzePortfolioRisk } from '../oracle/risk-analytics';
+import { AssetClass, AssetData, ConsensusResult, PortfolioAsset } from '../types';
 
 /**
  * MCP Server exposing RWA Nexus tools for AI system integration.
- * Provides 5 tools: valuate_asset, get_consensus, submit_onchain, list_agents, portfolio_summary.
+ * Provides 6 tools: valuate_asset, get_price, submit_onchain, list_agents, portfolio_summary, risk_analysis.
  */
 export class RWAMCPServer {
   private consensusEngine: ConsensusEngine;
@@ -72,6 +73,11 @@ export class RWAMCPServer {
         description: 'Get a summary of all assets in the portfolio with their latest valuations.',
         inputSchema: { type: 'object', properties: {} },
       },
+      {
+        name: 'risk_analysis',
+        description: 'Analyze portfolio risk including diversification score, concentration risk (HHI), stress tests across 5 scenarios, and confidence analysis. Returns actionable risk rating.',
+        inputSchema: { type: 'object', properties: {} },
+      },
     ];
   }
 
@@ -90,6 +96,8 @@ export class RWAMCPServer {
         return this.listAgents();
       case 'portfolio_summary':
         return this.portfolioSummary();
+      case 'risk_analysis':
+        return this.riskAnalysis();
       default:
         throw new Error(`Unknown tool: ${name}`);
     }
@@ -139,6 +147,27 @@ export class RWAMCPServer {
       assetClasses: a.config.assetClasses,
       description: a.config.description,
     }));
+  }
+
+  private riskAnalysis() {
+    const assets: PortfolioAsset[] = [];
+    const valuations = new Map<string, ConsensusResult>();
+
+    let tokenId = 0;
+    for (const [id, entry] of this.portfolio) {
+      assets.push({
+        tokenId: tokenId++,
+        assetData: entry.asset,
+        currentValuation: entry.consensus,
+        tokenSupply: 1000,
+        oracleAssetId: `oracle-${id}`,
+      });
+      if (entry.consensus) {
+        valuations.set(id, entry.consensus);
+      }
+    }
+
+    return analyzePortfolioRisk(assets, valuations);
   }
 
   private portfolioSummary() {

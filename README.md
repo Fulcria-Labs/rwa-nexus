@@ -14,7 +14,9 @@ Tokenizing real-world assets is one of Web3's biggest opportunities, but a criti
 - **Confidence-Weighted Consensus** — Higher-confidence valuations carry more weight; outliers are automatically filtered
 - **On-Chain Oracle** — Consensus valuations are submitted to BNB Chain smart contracts, fully auditable
 - **AI-Powered LTV** — Lending terms dynamically adjust based on oracle confidence scores
-- **MCP Integration** — Any AI system can interact with RWA Nexus via 5 MCP tools
+- **Portfolio Risk Analytics** — Diversification scoring, concentration analysis (HHI), stress testing across 5 scenarios, and confidence analysis
+- **Liquidation Engine** — Automated undercollateralized loan liquidation with oracle price feeds
+- **MCP Integration** — Any AI system can interact with RWA Nexus via 6 MCP tools
 
 ## Demo
 
@@ -55,7 +57,7 @@ The demo initializes all 3 AI agents, valuates a diversified portfolio (Manhatta
 │  └─────────────────────────────────────────────────┘   │
 │                                                         │
 │  ┌─────────────────────────────────────────────────┐   │
-│  │  MCP Server (5 tools) │ Web Dashboard (port 3457)│   │
+│  │  MCP Server (6 tools) │ Web Dashboard (port 3457)│   │
 │  └─────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────┘
 ```
@@ -74,7 +76,7 @@ The demo initializes all 3 AI agents, valuates a diversified portfolio (Manhatta
 |----------|---------|
 | **RWAToken** | ERC-1155 multi-token for tokenized RWAs. Create assets with metadata, set oracle addresses, update valuations. |
 | **RWAOracle** | On-chain oracle for AI-attested valuations. Authorized agents submit valuations; consensus computed via confidence-weighted averaging. |
-| **RWALending** | Collateralized lending against RWA tokens. LTV ratios dynamically adjust based on oracle confidence (50% base → 70% for high-confidence). |
+| **RWALending** | Collateralized lending against RWA tokens. LTV ratios dynamically adjust based on oracle confidence (50% base → 70% for high-confidence). Includes automated liquidation for undercollateralized positions. |
 
 ## Quick Start
 
@@ -82,7 +84,7 @@ The demo initializes all 3 AI agents, valuates a diversified portfolio (Manhatta
 # Install
 npm install
 
-# Run tests (1924 passing)
+# Run tests (1960 passing)
 npm test
 
 # Compile smart contracts
@@ -101,6 +103,7 @@ npm run demo
 | `submit_onchain` | Submit consensus valuation to BNB Chain oracle |
 | `list_agents` | List all registered AI valuation agents |
 | `portfolio_summary` | Get portfolio overview with all valuations |
+| `risk_analysis` | Portfolio risk analysis: diversification, HHI, stress tests, confidence |
 
 ## Technical Stack
 
@@ -108,7 +111,7 @@ npm run demo
 - **Solidity** 0.8.24 / Hardhat / OpenZeppelin
 - **ethers.js** v6 for BNB Chain interaction
 - **MCP SDK** for AI system integration
-- **1924 tests** across 60 test suites
+- **1960 tests** across 61 test suites
 
 ## Deployment
 

@@ -412,6 +412,158 @@ describe("RWALending", function () {
     });
   });
 
+  describe("Liquidation", function () {
+    beforeEach(async function () {
+      const value = ethers.parseEther("1");
+      await setupAssetWithOracle(value, 5000); // 50% confidence = baseLTV (50%)
+
+      await owner.sendTransaction({
+        to: await lending.getAddress(),
+        value: ethers.parseEther("100"),
+      });
+
+      // Borrow: loan amount = 100 * 1e18 * 5000 / (10000 * 1e18) = 50
+      await lending.connect(borrower).borrow(0, 100, ASSET_ID);
+    });
+
+    it("should not allow liquidation of healthy loan", async function () {
+      // Loan is 50, collateral value is 100. 50 * 10000 = 500000 < 100 * 9000 = 900000
+      await expect(
+        lending.connect(other).liquidate(0, ASSET_ID, { value: 100 })
+      ).to.be.revertedWith("Loan not undercollateralized");
+    });
+
+    // Helper: advance past maxValuationAge then submit new lower-priced valuations
+    async function crashOraclePrice(newValue: bigint) {
+      // Advance time past 24h so old valuations expire from consensus window
+      await time.increase(25 * 60 * 60);
+      // Submit new valuations at the lower price
+      await oracle.connect(agent1).submitValuation(ASSET_ID, newValue, 5000, "price_drop_a");
+      await oracle.connect(agent2).submitValuation(ASSET_ID, newValue, 5000, "price_drop_b");
+    }
+
+    it("should allow liquidation when value drops below threshold", async function () {
+      // Loan: debt=50, collateral=100 tokens at 1 ETH each → collateralValue=100
+      // After crash to 0.5 ETH: collateralValue=50
+      // Check: 50 * 10000 = 500000 >= 50 * 9000 = 450000 ✓ (liquidatable)
+      await crashOraclePrice(ethers.parseEther("0.5"));
+
+      await lending.connect(other).liquidate(0, ASSET_ID, { value: 100 });
+
+      const loan = await lending.getLoan(0);
+      expect(loan.active).to.be.false;
+    });
+
+    it("should transfer collateral to liquidator", async function () {
+      await crashOraclePrice(ethers.parseEther("0.5"));
+
+      const balBefore = await token.balanceOf(other.address, 0);
+      await lending.connect(other).liquidate(0, ASSET_ID, { value: 100 });
+      const balAfter = await token.balanceOf(other.address, 0);
+
+      expect(balAfter - balBefore).to.equal(100); // Gets the collateral
+    });
+
+    it("should emit LoanLiquidated event", async function () {
+      await crashOraclePrice(ethers.parseEther("0.5"));
+
+      await expect(lending.connect(other).liquidate(0, ASSET_ID, { value: 100 }))
+        .to.emit(lending, "LoanLiquidated")
+        .withArgs(0, other.address);
+    });
+
+    it("should refund excess liquidation payment", async function () {
+      await crashOraclePrice(ethers.parseEther("0.5"));
+
+      const balBefore = await ethers.provider.getBalance(other.address);
+      const tx = await lending.connect(other).liquidate(0, ASSET_ID, { value: 1000 });
+      const receipt = await tx.wait();
+      const gasCost = receipt!.gasUsed * receipt!.gasPrice;
+      const balAfter = await ethers.provider.getBalance(other.address);
+
+      // Debt is ~50 + small interest from 25h. Net cost should be ~50 + gas, not 1000
+      const netCost = balBefore - balAfter - gasCost;
+      expect(netCost).to.be.lessThanOrEqual(52); // loan + ~25h of interest
+    });
+
+    it("should revert on inactive loan", async function () {
+      // Repay the loan first
+      await lending.connect(borrower).repay(0, { value: 100 });
+
+      await expect(
+        lending.connect(other).liquidate(0, ASSET_ID, { value: 100 })
+      ).to.be.revertedWith("Loan not active");
+    });
+
+    it("should revert with insufficient liquidation payment", async function () {
+      await crashOraclePrice(ethers.parseEther("0.5"));
+
+      await expect(
+        lending.connect(other).liquidate(0, ASSET_ID, { value: 1 })
+      ).to.be.revertedWith("Insufficient liquidation payment");
+    });
+
+    it("should revert with stale oracle price", async function () {
+      await time.increase(2 * 24 * 60 * 60);
+
+      await expect(
+        lending.connect(other).liquidate(0, ASSET_ID, { value: 100 })
+      ).to.be.revertedWith("Oracle price too stale");
+    });
+
+    it("should become liquidatable after interest accrual plus price drop", async function () {
+      // Advance 25h (past oracle age), submit price at 0.55 ETH
+      // Interest after 25h on 50 wei at 5% APR is tiny (~0.003), so totalDebt ≈ 50
+      // collateralValue = 0.55 * 100 / 1e18 = 55
+      // 50 * 10000 = 500000 < 55 * 9000 = 495000 — close but still healthy
+      // Use 0.54 ETH: collateralValue = 54, 50 * 10000 = 500000 >= 54 * 9000 = 486000 ✓
+      await crashOraclePrice(ethers.parseEther("0.54"));
+
+      await lending.connect(other).liquidate(0, ASSET_ID, { value: 100 });
+      const loan = await lending.getLoan(0);
+      expect(loan.active).to.be.false;
+    });
+  });
+
+  describe("Liquidation Query", function () {
+    beforeEach(async function () {
+      const value = ethers.parseEther("1");
+      await setupAssetWithOracle(value, 5000);
+
+      await owner.sendTransaction({
+        to: await lending.getAddress(),
+        value: ethers.parseEther("100"),
+      });
+
+      await lending.connect(borrower).borrow(0, 100, ASSET_ID);
+    });
+
+    it("should report healthy loan as not liquidatable", async function () {
+      const [liquidatable, totalDebt, collateralValue] = await lending.isLiquidatable(0, ASSET_ID);
+      expect(liquidatable).to.be.false;
+      expect(totalDebt).to.equal(50);
+      expect(collateralValue).to.equal(100);
+    });
+
+    it("should report undercollateralized loan as liquidatable", async function () {
+      // Advance past maxValuationAge so old valuations expire
+      await time.increase(25 * 60 * 60);
+      const newValue = ethers.parseEther("0.5");
+      await oracle.connect(agent1).submitValuation(ASSET_ID, newValue, 5000, "drop_a");
+      await oracle.connect(agent2).submitValuation(ASSET_ID, newValue, 5000, "drop_b");
+
+      const [liquidatable, totalDebt, collateralValue] = await lending.isLiquidatable(0, ASSET_ID);
+      expect(liquidatable).to.be.true;
+      expect(collateralValue).to.equal(50);
+    });
+
+    it("should return false for inactive loan", async function () {
+      await lending.connect(borrower).repay(0, { value: 100 });
+      const [liquidatable] = await lending.isLiquidatable(0, ASSET_ID);
+      expect(liquidatable).to.be.false;
+    });
+  });
+
   describe("View Functions", function () {
     it("should return empty array for borrower with no loans", async function () {
       const loans = await lending.getBorrowerLoans(other.address);

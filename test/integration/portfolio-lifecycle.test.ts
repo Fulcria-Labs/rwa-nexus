@@ -455,9 +455,9 @@ describe('Portfolio Lifecycle', () => {
   });
 
   describe('tool definitions structure', () => {
-    it('should have 5 tool definitions', () => {
+    it('should have 6 tool definitions', () => {
       const tools = server.getToolDefinitions();
-      expect(tools).toHaveLength(5);
+      expect(tools).toHaveLength(6);
     });
 
     it('should have required fields in valuate_asset schema', () => {

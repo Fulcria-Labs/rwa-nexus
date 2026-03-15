@@ -18,9 +18,9 @@ describe('RWAMCPServer', () => {
   });
 
   describe('tool definitions', () => {
-    it('should return 5 tools', () => {
+    it('should return 6 tools', () => {
       const tools = server.getToolDefinitions();
-      expect(tools).toHaveLength(5);
+      expect(tools).toHaveLength(6);
     });
 
     it('should include all expected tools', () => {
@@ -31,6 +31,7 @@ describe('RWAMCPServer', () => {
       expect(names).toContain('submit_onchain');
       expect(names).toContain('list_agents');
       expect(names).toContain('portfolio_summary');
+      expect(names).toContain('risk_analysis');
     });
 
     it('should have valid input schemas', () => {
