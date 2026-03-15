@@ -80,7 +80,7 @@ The demo initializes all 3 AI agents, valuates a diversified portfolio (Manhatta
 # Install
 npm install
 
-# Run tests (2041 passing)
+# Run tests (1924 passing)
 npm test
 
 # Compile smart contracts
@@ -106,7 +106,7 @@ npm run demo
 - **Solidity** 0.8.24 / Hardhat / OpenZeppelin
 - **ethers.js** v6 for BNB Chain interaction
 - **MCP SDK** for AI system integration
-- **2041 tests** across 60 test suites
+- **1924 tests** across 60 test suites
 
 ## Deployment
 
