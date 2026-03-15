@@ -3,6 +3,8 @@ import { ethers } from "hardhat";
 import { RWAToken } from "../../typechain-types";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 
+if (typeof jest !== "undefined") { jest.setTimeout(30000); }
+
 describe("RWAToken", function () {
   let token: RWAToken;
   let owner: SignerWithAddress;

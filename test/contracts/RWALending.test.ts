@@ -4,6 +4,8 @@ import { RWAToken, RWAOracle, RWALending } from "../../typechain-types";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { time } from "@nomicfoundation/hardhat-network-helpers";
 
+if (typeof jest !== "undefined") { jest.setTimeout(30000); }
+
 describe("RWALending", function () {
   let token: RWAToken;
   let oracle: RWAOracle;
@@ -169,7 +171,7 @@ describe("RWALending", function () {
       const balAfter = await ethers.provider.getBalance(borrower.address);
 
       // Borrower should receive 50 wei (loan amount) minus gas
-      expect(balAfter + gasCost - balBefore).to.equal(50);
+      expect(balAfter + gasCost - balBefore).to.equal(BigInt(50));
     });
 
     it("should track borrower loans", async function () {

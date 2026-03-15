@@ -7,23 +7,32 @@
   "scripts": {
     "build": "tsc",
     "test": "jest --forceExit",
+    "postinstall": "node patches/fix-ts-node.js",
     "test:contracts": "npx hardhat test",
     "compile": "npx hardhat compile",
     "deploy:testnet": "npx hardhat run scripts/deploy.ts --network bscTestnet",
     "demo": "ts-node examples/demo.ts",
     "dashboard": "ts-node src/dashboard/server.ts"
   },
-  "keywords": ["rwa", "real-world-assets", "bnb-chain", "ai", "oracle", "tokenization"],
+  "keywords": [
+    "rwa",
+    "real-world-assets",
+    "bnb-chain",
+    "ai",
+    "oracle",
+    "tokenization"
+  ],
   "license": "MIT",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.0.0",
     "@types/jest": "^29.5.0",
     "@types/node": "^22.0.0",
-    "@openzeppelin/contracts": "^5.0.0",
     "hardhat": "^2.28.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.2.0",
     "ts-node": "^10.9.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.6.0"
   },
   "dependencies": {

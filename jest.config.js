@@ -11,6 +11,8 @@ module.exports = {
       preset: 'ts-jest',
       testEnvironment: 'node',
       testMatch: ['<rootDir>/test/contracts/**/*.test.ts'],
+      testTimeout: 30000,
+      globalSetup: '<rootDir>/test/contracts/globalSetup.ts',
       transform: {
         '^.+\\.ts$': ['ts-jest', { tsconfig: 'tsconfig.test.json' }],
       },

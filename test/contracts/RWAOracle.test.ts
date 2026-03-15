@@ -4,6 +4,8 @@ import { RWAOracle } from "../../typechain-types";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { time } from "@nomicfoundation/hardhat-network-helpers";
 
+if (typeof jest !== "undefined") { jest.setTimeout(30000); }
+
 describe("RWAOracle", function () {
   let oracle: RWAOracle;
   let owner: SignerWithAddress;
