@@ -26,7 +26,7 @@ RWA Nexus is an AI-powered real-world asset intelligence platform for BNB Chain.
 - Hardhat + OpenZeppelin + ethers.js v6
 - BNB Chain (BSC Testnet/Mainnet)
 - Model Context Protocol (MCP)
-- 239 tests across 14 suites
+- 1378 tests across 47 suites
 
 ## Submission Checklist
 
@@ -35,7 +35,7 @@ RWA Nexus is an AI-powered real-world asset intelligence platform for BNB Chain.
 - [x] 3 Solidity smart contracts (RWAToken, RWAOracle, RWALending)
 - [x] MCP server with 5 tools
 - [x] Web dashboard
-- [x] 239 passing tests (14 suites)
+- [x] 1378 passing tests (47 suites)
 - [x] README with architecture documentation
 - [ ] BNB Chain testnet deployment
 - [ ] Demo video
