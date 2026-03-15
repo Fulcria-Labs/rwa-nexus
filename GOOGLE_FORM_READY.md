@@ -1,0 +1,64 @@
+# RWA Demo Day - Google Form Answers (Copy-Paste Ready)
+
+**Form URL:** https://forms.gle/t87uDXQFspa8tyq36
+**Prize:** $10,000 + $100,000 incubation program
+**Deadline:** March 31, 2026
+**Note:** Only 4 registrants — excellent odds!
+
+---
+
+## Project Name
+RWA Nexus
+
+## Team Name
+Fulcria Labs
+
+## Contact Email
+agent@fulcria.com
+
+## Project Description (short)
+AI-powered real-world asset intelligence platform for BNB Chain — multi-agent valuation, consensus oracle, and DeFi lending.
+
+## Project Description (detailed)
+RWA Nexus brings institutional-grade asset valuation to DeFi through AI. Three specialized agents (Property, Commodity, Treasury) independently analyze real-world assets using distinct methodologies. A confidence-weighted consensus engine with outlier detection produces reliable on-chain price feeds via an ERC-1155 oracle contract.
+
+The platform enables:
+- **Multi-Agent Valuation** — Three AI agents analyze assets through comparable sales analysis, spot pricing, and yield curve modeling
+- **Consensus Oracle** — Confidence-weighted consensus with automatic outlier filtering for reliable on-chain pricing
+- **RWA Tokenization** — ERC-1155 tokens representing fractional ownership of real-world assets (real estate, commodities, fixed income)
+- **AI-Adjusted Lending** — Collateralized lending where LTV ratios dynamically adjust based on oracle confidence scores
+- **MCP Integration** — 5 standardized tools allowing any AI system to interact with the platform
+
+Built with TypeScript, Solidity 0.8.24, Hardhat, and OpenZeppelin on BNB Chain. 1,924 tests across 60 suites.
+
+## How BNB Chain is Used
+- **RWAToken.sol** — ERC-1155 contract for tokenizing real-world assets with metadata URIs
+- **RWAOracle.sol** — On-chain oracle storing AI consensus valuations with confidence scores and timestamps
+- **RWALending.sol** — Collateralized lending protocol using oracle prices for AI-adjusted LTV ratios
+- Designed for BNB Chain BSC testnet/mainnet deployment
+
+## What Makes This Unique
+1. **Multi-agent consensus** — Not just one AI opinion, but three independent valuations with statistical consensus
+2. **Confidence-weighted pricing** — Oracle reports not just price but confidence level, enabling smarter DeFi protocols
+3. **Dynamic risk adjustment** — Lending LTV ratios automatically tighten when oracle confidence is lower
+4. **MCP-native** — Any AI system can plug in and use the valuation infrastructure
+
+## Tech Stack
+- TypeScript / Node.js (agents, consensus engine, MCP server)
+- Solidity 0.8.24 (smart contracts)
+- Hardhat + OpenZeppelin + ethers.js v6
+- BNB Chain (BSC)
+- Model Context Protocol (MCP)
+- Web Dashboard (real-time monitoring)
+
+## GitHub Repository
+https://github.com/Fulcria-Labs/rwa-nexus
+
+## Demo
+Demo recording included in repository.
+
+## Team Background
+Solo developer with experience in DeFi, AI agent systems, and blockchain security. CVE-2026-3515 credited researcher. Multiple open-source contributions to AI/blockchain ecosystem projects.
+
+---
+*Last updated: 2026-03-15*
