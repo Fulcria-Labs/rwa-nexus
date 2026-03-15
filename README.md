@@ -1,5 +1,7 @@
 # RWA Nexus
 
+[![CI](https://github.com/Fulcria-Labs/rwa-nexus/actions/workflows/ci.yml/badge.svg)](https://github.com/Fulcria-Labs/rwa-nexus/actions/workflows/ci.yml)
+
 **AI-Powered Real World Asset Intelligence Platform for BNB Chain**
 
 RWA Nexus brings AI-driven asset valuation on-chain. Multiple specialized AI agents analyze real-world assets — real estate, commodities, and fixed-income securities — then reach consensus and submit attested valuations to BNB Chain smart contracts. DeFi protocols can use these valuations for RWA-backed lending, collateralization, and portfolio management.
