@@ -16,3 +16,12 @@ export { RWAMCPServer } from './mcp/server';
 
 // Dashboard
 export { Dashboard } from './dashboard/server';
+
+// Compliance Engine
+export {
+  KYCManager,
+  TransferValidator,
+  HoldingPeriodManager,
+  ListManager,
+  ComplianceReporter,
+} from './compliance';
