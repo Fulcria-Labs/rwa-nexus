@@ -184,7 +184,7 @@ describe('Round-Trip Integration Tests', () => {
 
     it('tool definitions are well-formed', () => {
       const tools = server.getToolDefinitions();
-      expect(tools.length).toBe(6);
+      expect(tools.length).toBe(8);
       for (const tool of tools) {
         expect(tool.name).toBeTruthy();
         expect(tool.description).toBeTruthy();

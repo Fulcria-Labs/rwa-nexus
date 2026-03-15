@@ -1,6 +1,8 @@
 import { ConsensusEngine } from '../oracle/consensus';
 import { ChainBridge } from '../oracle/chain-bridge';
 import { analyzePortfolioRisk } from '../oracle/risk-analytics';
+import { runMonteCarloSimulation } from '../oracle/monte-carlo';
+import { AgentReputationTracker } from '../agents/reputation';
 import { AssetClass, AssetData, ConsensusResult, PortfolioAsset } from '../types';
 
 /**
@@ -11,6 +13,7 @@ export class RWAMCPServer {
   private consensusEngine: ConsensusEngine;
   private chainBridge: ChainBridge | null;
   private portfolio: Map<string, { asset: AssetData; consensus: ConsensusResult | null }> = new Map();
+  private reputationTracker: AgentReputationTracker = new AgentReputationTracker();
 
   constructor(config: {
     consensusEngine: ConsensusEngine;
@@ -78,6 +81,23 @@ export class RWAMCPServer {
         description: 'Analyze portfolio risk including diversification score, concentration risk (HHI), stress tests across 5 scenarios, and confidence analysis. Returns actionable risk rating.',
         inputSchema: { type: 'object', properties: {} },
       },
+      {
+        name: 'monte_carlo_var',
+        description: 'Run Monte Carlo VaR/CVaR simulation on the portfolio. Simulates thousands of correlated return scenarios to compute Value-at-Risk, Conditional VaR, and return distribution statistics.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            numSimulations: { type: 'number', description: 'Number of simulation paths (default: 10000)' },
+            timeHorizonDays: { type: 'number', description: 'Projection period in days (default: 30)' },
+            confidenceLevels: { type: 'array', items: { type: 'number' }, description: 'VaR confidence levels (default: [0.95, 0.99])' },
+          },
+        },
+      },
+      {
+        name: 'agent_reputation',
+        description: 'Get reputation scores for all valuation agents based on their historical accuracy, consistency, bias, and trend.',
+        inputSchema: { type: 'object', properties: {} },
+      },
     ];
   }
 
@@ -98,6 +118,10 @@ export class RWAMCPServer {
         return this.portfolioSummary();
       case 'risk_analysis':
         return this.riskAnalysis();
+      case 'monte_carlo_var':
+        return this.monteCarloVaR(args);
+      case 'agent_reputation':
+        return this.agentReputation();
       default:
         throw new Error(`Unknown tool: ${name}`);
     }
@@ -115,6 +139,10 @@ export class RWAMCPServer {
 
     const consensus = await this.consensusEngine.evaluateAsset(asset);
     this.portfolio.set(asset.id, { asset, consensus });
+
+    // Track agent accuracy for reputation
+    this.reputationTracker.recordConsensusWithClass(consensus, asset.assetClass);
+
     return consensus;
   }
 
@@ -197,6 +225,42 @@ export class RWAMCPServer {
       assetCount: assets.length,
       totalValue,
       assets,
+    };
+  }
+
+  private monteCarloVaR(args: Record<string, unknown>) {
+    const assets: PortfolioAsset[] = [];
+    const valuations = new Map<string, ConsensusResult>();
+
+    let tokenId = 0;
+    for (const [id, entry] of this.portfolio) {
+      assets.push({
+        tokenId: tokenId++,
+        assetData: entry.asset,
+        currentValuation: entry.consensus,
+        tokenSupply: 1000,
+        oracleAssetId: `oracle-${id}`,
+      });
+      if (entry.consensus) {
+        valuations.set(id, entry.consensus);
+      }
+    }
+
+    return runMonteCarloSimulation(assets, valuations, {
+      numSimulations: (args.numSimulations as number) ?? 10000,
+      timeHorizonDays: (args.timeHorizonDays as number) ?? 30,
+      confidenceLevels: (args.confidenceLevels as number[]) ?? [0.95, 0.99],
+    });
+  }
+
+  private agentReputation() {
+    return {
+      agents: this.reputationTracker.getAllReputations(),
+      consensusWeights: this.reputationTracker.getConsensusWeights(
+        this.consensusEngine.getAgents().map(a => a.config.id)
+      ),
+      underperforming: this.reputationTracker.flagUnderperformingAgents(),
+      biasPatterns: this.reputationTracker.detectBiasPatterns(),
     };
   }
 }
