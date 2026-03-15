@@ -133,9 +133,18 @@ async function main() {
     const consensus = await engine.evaluateAsset(asset);
     dashboard.addValuation(consensus, asset);
   }
-  const url = await dashboard.start();
-  console.log(`Dashboard running at: ${url}`);
-  console.log('Press Ctrl+C to exit.\n');
+  try {
+    const url = await dashboard.start();
+    console.log(`Dashboard running at: ${url}`);
+    console.log('Press Ctrl+C to exit.\n');
+  } catch (err: any) {
+    if (err?.code === 'EADDRINUSE') {
+      console.log('Dashboard port in use — skipping dashboard startup.');
+      console.log('Run standalone: npm run dashboard\n');
+    } else {
+      throw err;
+    }
+  }
 }
 
 main().catch(console.error);
