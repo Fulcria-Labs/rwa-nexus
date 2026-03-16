@@ -16,7 +16,10 @@ Tokenizing real-world assets is one of Web3's biggest opportunities, but a criti
 - **AI-Powered LTV** — Lending terms dynamically adjust based on oracle confidence scores
 - **Portfolio Risk Analytics** — Diversification scoring, concentration analysis (HHI), stress testing across 5 scenarios, and confidence analysis
 - **Liquidation Engine** — Automated undercollateralized loan liquidation with oracle price feeds
-- **MCP Integration** — Any AI system can interact with RWA Nexus via 6 MCP tools
+- **Monte Carlo VaR/CVaR** — Industry-grade risk engine with correlated simulations, drawdown analysis, and percentile reporting
+- **Agent Reputation Tracking** — Historical accuracy (MAPE), bias detection, and consistency scoring across valuations
+- **Compliance Engine** — Full KYC/AML lifecycle, transfer validation, holding periods, jurisdiction restrictions, and SAR generation
+- **MCP Integration** — Any AI system can interact with RWA Nexus via 8 MCP tools
 
 ## Demo
 
@@ -57,7 +60,13 @@ The demo initializes all 3 AI agents, valuates a diversified portfolio (Manhatta
 │  └─────────────────────────────────────────────────┘   │
 │                                                         │
 │  ┌─────────────────────────────────────────────────┐   │
-│  │  MCP Server (6 tools) │ Web Dashboard (port 3457)│   │
+│  │  Compliance Engine   │ Monte Carlo VaR/CVaR     │   │
+│  │  KYC/AML + Transfer  │ Portfolio Risk + Stress   │   │
+│  │  Holding Periods     │ Agent Reputation Track    │   │
+│  └─────────────────────────────────────────────────┘   │
+│                                                         │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │  MCP Server (8 tools) │ Web Dashboard (port 3457)│   │
 │  └─────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────┘
 ```
@@ -104,6 +113,20 @@ npm run demo
 | `list_agents` | List all registered AI valuation agents |
 | `portfolio_summary` | Get portfolio overview with all valuations |
 | `risk_analysis` | Portfolio risk analysis: diversification, HHI, stress tests, confidence |
+| `monte_carlo_var` | Monte Carlo VaR/CVaR simulation with correlated returns and drawdown analysis |
+| `agent_reputation` | Historical accuracy tracking, bias detection, and consistency scoring |
+
+## Compliance Engine
+
+RWA Nexus includes a production-grade regulatory compliance framework:
+
+| Component | Purpose |
+|-----------|---------|
+| **KYCManager** | Full KYC/AML lifecycle: registration, basic/enhanced verification, PEP/sanctions screening, automatic expiry |
+| **TransferValidator** | Jurisdiction-based restrictions (SEC Reg D/S, MiFID II, MiCA), investor-type gates, volume limits |
+| **HoldingPeriodManager** | Rule 144 compliance, lock-up periods, FIFO eligibility tracking, drip-feed limits |
+| **ListManager** | Global blacklists + per-token whitelists with full audit trail |
+| **ComplianceReporter** | Periodic compliance reports, holder concentration analysis, SAR generation |
 
 ## Technical Stack
 
@@ -116,15 +139,25 @@ npm run demo
 ## Deployment
 
 ```bash
+# Compile contracts
+npm run compile
+
 # Set deployer key
 export DEPLOYER_PRIVATE_KEY=your_key_here
 
-# Deploy to BSC Testnet
-npm run deploy:testnet
+# Deploy to BSC Testnet (creates assets, submits valuations, funds lending pool)
+npx hardhat run scripts/deploy.ts --network bscTestnet
 
 # Deploy to BSC Mainnet
-npm run deploy:bsc
+npx hardhat run scripts/deploy.ts --network bscMainnet
 ```
+
+The deploy script:
+1. Deploys all 3 contracts (RWAOracle, RWAToken, RWALending)
+2. Authorizes the deployer as an AI agent on the oracle
+3. Creates 3 sample RWA assets (real estate, gold, treasury)
+4. Submits AI-attested valuations with confidence scores
+5. Funds the lending pool with BNB for collateralized borrowing
 
 ## RWA Demo Day Submission
 

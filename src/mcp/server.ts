@@ -7,7 +7,7 @@ import { AssetClass, AssetData, ConsensusResult, PortfolioAsset } from '../types
 
 /**
  * MCP Server exposing RWA Nexus tools for AI system integration.
- * Provides 6 tools: valuate_asset, get_price, submit_onchain, list_agents, portfolio_summary, risk_analysis.
+ * Provides 8 tools: valuate_asset, get_price, submit_onchain, list_agents, portfolio_summary, risk_analysis, monte_carlo_var, agent_reputation.
  */
 export class RWAMCPServer {
   private consensusEngine: ConsensusEngine;
