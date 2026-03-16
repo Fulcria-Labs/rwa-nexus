@@ -7,7 +7,7 @@ import { AssetClass, AssetData, ConsensusResult, PortfolioAsset } from '../types
 
 /**
  * MCP Server exposing RWA Nexus tools for AI system integration.
- * Provides 8 tools: valuate_asset, get_price, submit_onchain, list_agents, portfolio_summary, risk_analysis, monte_carlo_var, agent_reputation.
+ * Provides 10 tools: valuate_asset, get_price, submit_onchain, list_agents, portfolio_summary, risk_analysis, monte_carlo_var, agent_reputation, explain_valuation, compare_agents.
  */
 export class RWAMCPServer {
   private consensusEngine: ConsensusEngine;
@@ -98,6 +98,28 @@ export class RWAMCPServer {
         description: 'Get reputation scores for all valuation agents based on their historical accuracy, consistency, bias, and trend.',
         inputSchema: { type: 'object', properties: {} },
       },
+      {
+        name: 'explain_valuation',
+        description: 'Get a detailed methodology breakdown for an asset valuation, showing each agent\'s approach, data points used, confidence reasoning, and how consensus was reached.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            assetId: { type: 'string', description: 'Asset identifier to explain' },
+          },
+          required: ['assetId'],
+        },
+      },
+      {
+        name: 'compare_agents',
+        description: 'Compare how different agents would valuate the same asset, showing methodology differences, data sources, and where they agree or disagree.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            assetId: { type: 'string', description: 'Asset identifier to compare agent valuations for' },
+          },
+          required: ['assetId'],
+        },
+      },
     ];
   }
 
@@ -122,6 +144,10 @@ export class RWAMCPServer {
         return this.monteCarloVaR(args);
       case 'agent_reputation':
         return this.agentReputation();
+      case 'explain_valuation':
+        return this.explainValuation(args.assetId as string);
+      case 'compare_agents':
+        return this.compareAgents(args.assetId as string);
       default:
         throw new Error(`Unknown tool: ${name}`);
     }
@@ -261,6 +287,142 @@ export class RWAMCPServer {
       ),
       underperforming: this.reputationTracker.flagUnderperformingAgents(),
       biasPatterns: this.reputationTracker.detectBiasPatterns(),
+    };
+  }
+
+  private explainValuation(assetId: string) {
+    const entry = this.portfolio.get(assetId);
+    if (!entry?.consensus) {
+      return { error: `No valuation found for asset: ${assetId}. Run valuate_asset first.` };
+    }
+
+    const consensus = entry.consensus;
+    const agentBreakdowns = consensus.valuations.map(v => {
+      // Categorize data points by source
+      const dataBySource: Record<string, Array<{ metric: string; value: number | string; weight: number }>> = {};
+      for (const dp of v.dataPoints) {
+        if (!dataBySource[dp.source]) {
+          dataBySource[dp.source] = [];
+        }
+        dataBySource[dp.source].push({
+          metric: dp.metric,
+          value: dp.value,
+          weight: dp.weight,
+        });
+      }
+
+      // Compute contribution to consensus
+      const totalConfidenceWeight = consensus.valuations.reduce((sum, val) => sum + val.confidence, 0);
+      const contributionWeight = totalConfidenceWeight > 0
+        ? Math.round((v.confidence / totalConfidenceWeight) * 10000) / 100
+        : 0;
+
+      return {
+        agentId: v.agentId,
+        methodology: v.methodology,
+        valuedAt: v.value,
+        confidence: v.confidence,
+        consensusContribution: `${contributionWeight}%`,
+        deviationFromConsensus: consensus.consensusValue > 0
+          ? `${Math.round(((v.value - consensus.consensusValue) / consensus.consensusValue) * 10000) / 100}%`
+          : 'N/A',
+        dataSources: dataBySource,
+        dataPointCount: v.dataPoints.length,
+      };
+    });
+
+    // Agreement analysis
+    const values = consensus.valuations.map(v => v.value);
+    const minVal = Math.min(...values);
+    const maxVal = Math.max(...values);
+    const spread = maxVal > 0 ? ((maxVal - minVal) / maxVal) * 100 : 0;
+
+    return {
+      assetId,
+      assetName: entry.asset.name,
+      assetClass: entry.asset.assetClass,
+      consensusValue: consensus.consensusValue,
+      consensusConfidence: consensus.avgConfidence,
+      consensusMethodology: consensus.methodology,
+      agentCount: consensus.valuations.length,
+      agentBreakdowns,
+      agreementAnalysis: {
+        minValuation: minVal,
+        maxValuation: maxVal,
+        spreadPercent: Math.round(spread * 100) / 100,
+        agreement: spread < 10 ? 'HIGH' : spread < 25 ? 'MODERATE' : 'LOW',
+      },
+      timestamp: consensus.timestamp.toISOString(),
+    };
+  }
+
+  private compareAgents(assetId: string) {
+    const entry = this.portfolio.get(assetId);
+    if (!entry?.consensus) {
+      return { error: `No valuation found for asset: ${assetId}. Run valuate_asset first.` };
+    }
+
+    const consensus = entry.consensus;
+    const agents = this.consensusEngine.getAgents();
+
+    // Find which agents participated vs didn't
+    const participatingIds = new Set(consensus.valuations.map(v => v.agentId));
+    const capableAgents = agents.filter(a => a.canValuate(entry.asset.assetClass));
+    const incapableAgents = agents.filter(a => !a.canValuate(entry.asset.assetClass));
+
+    // Build comparison matrix
+    const comparisons = consensus.valuations.map(v => ({
+      agentId: v.agentId,
+      agentName: agents.find(a => a.config.id === v.agentId)?.config.name || v.agentId,
+      value: v.value,
+      confidence: v.confidence,
+      methodology: v.methodology,
+      dataPointCount: v.dataPoints.length,
+      metrics: v.dataPoints.map(dp => dp.metric),
+    }));
+
+    // Find common and unique metrics
+    const allMetrics = new Set<string>();
+    const metricsByAgent: Record<string, Set<string>> = {};
+    for (const v of consensus.valuations) {
+      metricsByAgent[v.agentId] = new Set(v.dataPoints.map(dp => dp.metric));
+      v.dataPoints.forEach(dp => allMetrics.add(dp.metric));
+    }
+
+    const commonMetrics: string[] = [];
+    const uniqueMetrics: Record<string, string[]> = {};
+    for (const metric of allMetrics) {
+      const agentsWithMetric = Object.entries(metricsByAgent)
+        .filter(([, metrics]) => metrics.has(metric))
+        .map(([id]) => id);
+      if (agentsWithMetric.length === consensus.valuations.length) {
+        commonMetrics.push(metric);
+      } else {
+        for (const agentId of agentsWithMetric) {
+          if (!uniqueMetrics[agentId]) uniqueMetrics[agentId] = [];
+          uniqueMetrics[agentId].push(metric);
+        }
+      }
+    }
+
+    return {
+      assetId,
+      assetName: entry.asset.name,
+      assetClass: entry.asset.assetClass,
+      consensusValue: consensus.consensusValue,
+      agentComparisons: comparisons,
+      capableAgentCount: capableAgents.length,
+      participatingAgentCount: consensus.valuations.length,
+      incapableAgents: incapableAgents.map(a => ({
+        id: a.config.id,
+        name: a.config.name,
+        assetClasses: a.config.assetClasses,
+      })),
+      metricAnalysis: {
+        commonMetrics,
+        uniqueMetrics,
+        totalUniqueMetrics: allMetrics.size,
+      },
     };
   }
 }

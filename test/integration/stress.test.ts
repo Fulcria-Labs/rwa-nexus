@@ -146,7 +146,7 @@ describe('Stress and Edge Case Integration Tests', () => {
     it('should get tool definitions with correct count', () => {
       const server = new RWAMCPServer({ consensusEngine: engine });
       const tools = server.getToolDefinitions();
-      expect(tools).toHaveLength(8);
+      expect(tools).toHaveLength(10);
 
       const names = tools.map(t => t.name);
       expect(names).toContain('valuate_asset');

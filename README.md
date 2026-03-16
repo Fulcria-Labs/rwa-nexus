@@ -4,7 +4,7 @@
 
 **AI-Powered Real World Asset Intelligence Platform for BNB Chain**
 
-RWA Nexus brings AI-driven asset valuation on-chain. Multiple specialized AI agents analyze real-world assets — real estate, commodities, and fixed-income securities — then reach consensus and submit attested valuations to BNB Chain smart contracts. DeFi protocols can use these valuations for RWA-backed lending, collateralization, and portfolio management.
+RWA Nexus brings AI-driven asset valuation on-chain. Multiple specialized AI agents analyze real-world assets — real estate, commodities, fixed-income securities, and equities — then reach consensus and submit attested valuations to BNB Chain smart contracts. DeFi protocols can use these valuations for RWA-backed lending, collateralization, and portfolio management.
 
 ## Why RWA Nexus?
 
@@ -19,7 +19,7 @@ Tokenizing real-world assets is one of Web3's biggest opportunities, but a criti
 - **Monte Carlo VaR/CVaR** — Industry-grade risk engine with correlated simulations, drawdown analysis, and percentile reporting
 - **Agent Reputation Tracking** — Historical accuracy (MAPE), bias detection, and consistency scoring across valuations
 - **Compliance Engine** — Full KYC/AML lifecycle, transfer validation, holding periods, jurisdiction restrictions, and SAR generation
-- **MCP Integration** — Any AI system can interact with RWA Nexus via 8 MCP tools
+- **MCP Integration** — Any AI system can interact with RWA Nexus via 10 MCP tools
 
 ## Demo
 
@@ -28,7 +28,7 @@ Tokenizing real-world assets is one of Web3's biggest opportunities, but a criti
 npm run demo
 ```
 
-The demo initializes all 3 AI agents, valuates a diversified portfolio (Manhattan penthouse, Hong Kong commercial space, gold reserves, crude oil, treasuries, corporate bonds), and displays consensus values with confidence scores.
+The demo initializes all 4 AI agents, valuates a diversified portfolio (Manhattan penthouse, Hong Kong commercial space, gold reserves, crude oil, treasuries, corporate bonds, equities), and displays consensus values with confidence scores.
 
 ## Architecture
 
@@ -36,15 +36,15 @@ The demo initializes all 3 AI agents, valuates a diversified portfolio (Manhatta
 ┌─────────────────────────────────────────────────────────┐
 │                     RWA Nexus                           │
 │                                                         │
-│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐   │
-│  │  Property     │ │  Commodity   │ │  Treasury    │   │
-│  │  Agent        │ │  Agent       │ │  Agent       │   │
-│  │              │ │              │ │              │   │
-│  │ Comparable   │ │ Spot prices  │ │ Yield curve  │   │
-│  │ sales + DCF  │ │ + seasonal   │ │ + credit     │   │
-│  │ + condition  │ │ + volatility │ │ + duration   │   │
-│  └──────┬───────┘ └──────┬───────┘ └──────┬───────┘   │
-│         └────────────────┼────────────────┘            │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐ │
+│  │ Property   │ │ Commodity  │ │ Treasury   │ │ Equity     │ │
+│  │ Agent      │ │ Agent      │ │ Agent      │ │ Agent      │ │
+│  │            │ │            │ │            │ │            │ │
+│  │ Comp sales │ │ Spot price │ │ Yield crv  │ │ P/E + DCF  │ │
+│  │ + income   │ │ + seasonal │ │ + credit   │ │ + dividend │ │
+│  │ + conditn  │ │ + volatil  │ │ + duration │ │ + book val │ │
+│  └─────┬──────┘ └─────┬──────┘ └─────┬──────┘ └─────┬──────┘ │
+│        └──────────────┼──────────────┼──────────────┘        │
 │                          ▼                              │
 │  ┌─────────────────────────────────────────────────┐   │
 │  │            Consensus Engine                      │   │
@@ -66,7 +66,7 @@ The demo initializes all 3 AI agents, valuates a diversified portfolio (Manhatta
 │  └─────────────────────────────────────────────────┘   │
 │                                                         │
 │  ┌─────────────────────────────────────────────────┐   │
-│  │  MCP Server (8 tools) │ Web Dashboard (port 3457)│   │
+│  │  MCP Server (10 tools)│ Web Dashboard (port 3457)│   │
 │  └─────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────┘
 ```
@@ -78,6 +78,7 @@ The demo initializes all 3 AI agents, valuates a diversified portfolio (Manhatta
 | **PropertyAgent** | Real Estate | Blended comparable sales (60%) + income capitalization (40%), adjusted for condition and age depreciation. Covers 11 major markets. |
 | **CommodityAgent** | Commodities | Spot price analysis with seasonal adjustments, quality grading, and storage cost deductions. Supports 12 commodities. Confidence inversely correlated with volatility. |
 | **TreasuryAgent** | Fixed Income | DCF using interpolated yield curves (4 curve types), credit spread adjustment (7 rating levels), and PV of coupon/principal. |
+| **EquityAgent** | Equities | Blended P/E multiples (35%), discounted cash flow (45%), and dividend discount model (20%). 11 industry sectors, 4 risk profiles, 5 market cap tiers. |
 
 ## Smart Contracts
 
@@ -93,7 +94,7 @@ The demo initializes all 3 AI agents, valuates a diversified portfolio (Manhatta
 # Install
 npm install
 
-# Run tests (2223 passing)
+# Run tests (2325 passing)
 npm test
 
 # Compile smart contracts
@@ -115,6 +116,8 @@ npm run demo
 | `risk_analysis` | Portfolio risk analysis: diversification, HHI, stress tests, confidence |
 | `monte_carlo_var` | Monte Carlo VaR/CVaR simulation with correlated returns and drawdown analysis |
 | `agent_reputation` | Historical accuracy tracking, bias detection, and consistency scoring |
+| `explain_valuation` | Detailed methodology breakdown per agent: data sources, consensus contribution, and agreement analysis |
+| `compare_agents` | Side-by-side agent comparison showing methodology differences, common/unique metrics, and capability gaps |
 
 ## Compliance Engine
 
@@ -134,7 +137,7 @@ RWA Nexus includes a production-grade regulatory compliance framework:
 - **Solidity** 0.8.24 / Hardhat / OpenZeppelin
 - **ethers.js** v6 for BNB Chain interaction
 - **MCP SDK** for AI system integration
-- **2223 tests** across 68 test suites
+- **2325 tests** across 71 test suites
 
 ## Deployment
 

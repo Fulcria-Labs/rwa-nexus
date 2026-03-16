@@ -18,9 +18,9 @@ describe('RWAMCPServer', () => {
   });
 
   describe('tool definitions', () => {
-    it('should return 8 tools', () => {
+    it('should return 10 tools', () => {
       const tools = server.getToolDefinitions();
-      expect(tools).toHaveLength(8);
+      expect(tools).toHaveLength(10);
     });
 
     it('should include all expected tools', () => {
