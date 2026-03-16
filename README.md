@@ -4,7 +4,7 @@
 
 **AI-Powered Real World Asset Intelligence Platform for BNB Chain**
 
-RWA Nexus brings AI-driven asset valuation on-chain. Multiple specialized AI agents analyze real-world assets — real estate, commodities, fixed-income securities, and equities — then reach consensus and submit attested valuations to BNB Chain smart contracts. DeFi protocols can use these valuations for RWA-backed lending, collateralization, and portfolio management.
+RWA Nexus brings AI-driven asset valuation on-chain. Multiple specialized AI agents analyze real-world assets — real estate, commodities, fixed-income securities, equities, and accounts receivable — then reach consensus and submit attested valuations to BNB Chain smart contracts. DeFi protocols can use these valuations for RWA-backed lending, collateralization, and portfolio management.
 
 ## Why RWA Nexus?
 
@@ -28,7 +28,7 @@ Tokenizing real-world assets is one of Web3's biggest opportunities, but a criti
 npm run demo
 ```
 
-The demo initializes all 4 AI agents, valuates a diversified portfolio (Manhattan penthouse, Hong Kong commercial space, gold reserves, crude oil, treasuries, corporate bonds, equities), and displays consensus values with confidence scores.
+The demo initializes all 5 AI agents, valuates a diversified portfolio (Manhattan penthouse, Hong Kong commercial space, gold reserves, crude oil, treasuries, corporate bonds, equities, and invoice receivables), and displays consensus values with confidence scores.
 
 ## Architecture
 
@@ -36,15 +36,15 @@ The demo initializes all 4 AI agents, valuates a diversified portfolio (Manhatta
 ┌─────────────────────────────────────────────────────────┐
 │                     RWA Nexus                           │
 │                                                         │
-│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐ │
-│  │ Property   │ │ Commodity  │ │ Treasury   │ │ Equity     │ │
-│  │ Agent      │ │ Agent      │ │ Agent      │ │ Agent      │ │
-│  │            │ │            │ │            │ │            │ │
-│  │ Comp sales │ │ Spot price │ │ Yield crv  │ │ P/E + DCF  │ │
-│  │ + income   │ │ + seasonal │ │ + credit   │ │ + dividend │ │
-│  │ + conditn  │ │ + volatil  │ │ + duration │ │ + book val │ │
-│  └─────┬──────┘ └─────┬──────┘ └─────┬──────┘ └─────┬──────┘ │
-│        └──────────────┼──────────────┼──────────────┘        │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ │
+│  │ Property │ │Commodity │ │ Treasury │ │ Equity   │ │Receivabl │ │
+│  │ Agent    │ │ Agent    │ │ Agent    │ │ Agent    │ │ Agent    │ │
+│  │          │ │          │ │          │ │          │ │          │ │
+│  │Comp sales│ │Spot price│ │Yield crv │ │P/E + DCF │ │Aging +   │ │
+│  │+ income  │ │+ season  │ │+ credit  │ │+ dividend│ │credit +  │ │
+│  │+ conditn │ │+ volatil │ │+ duration│ │+ book val│ │default   │ │
+│  └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘ │
+│       └────────────┼───────────┼───────────┼───────────┘       │
 │                          ▼                              │
 │  ┌─────────────────────────────────────────────────┐   │
 │  │            Consensus Engine                      │   │
@@ -79,6 +79,7 @@ The demo initializes all 4 AI agents, valuates a diversified portfolio (Manhatta
 | **CommodityAgent** | Commodities | Spot price analysis with seasonal adjustments, quality grading, and storage cost deductions. Supports 12 commodities. Confidence inversely correlated with volatility. |
 | **TreasuryAgent** | Fixed Income | DCF using interpolated yield curves (4 curve types), credit spread adjustment (7 rating levels), and PV of coupon/principal. |
 | **EquityAgent** | Equities | Blended P/E multiples (35%), discounted cash flow (45%), and dividend discount model (20%). 11 industry sectors, 4 risk profiles, 5 market cap tiers. |
+| **ReceivablesAgent** | Receivables | Invoice factoring valuation using aging-weighted collection probability, debtor credit analysis (11 rating levels), industry default rates (15 sectors), time-value discounting, concentration risk penalties, and recourse/diversification premiums. |
 
 ## Smart Contracts
 
@@ -94,7 +95,7 @@ The demo initializes all 4 AI agents, valuates a diversified portfolio (Manhatta
 # Install
 npm install
 
-# Run tests (2325 passing)
+# Run tests (2396 passing)
 npm test
 
 # Compile smart contracts

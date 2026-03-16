@@ -3,6 +3,7 @@ import {
   PropertyAgent,
   CommodityAgent,
   TreasuryAgent,
+  ReceivablesAgent,
   RWAMCPServer,
   Dashboard,
   AssetClass,
@@ -21,6 +22,7 @@ async function main() {
   engine.registerAgent(new PropertyAgent());
   engine.registerAgent(new CommodityAgent());
   engine.registerAgent(new TreasuryAgent());
+  engine.registerAgent(new ReceivablesAgent());
 
   console.log(`Registered ${engine.getAgents().length} AI valuation agents:\n`);
   for (const agent of engine.getAgents()) {
@@ -99,6 +101,22 @@ async function main() {
         faceValue: 1000,
         creditRating: 'BBB',
         quantity: 50,
+      },
+    },
+    {
+      id: 'invoice-pool-tech',
+      assetClass: AssetClass.RECEIVABLE,
+      name: 'Tech Invoice Pool',
+      description: 'Pooled AR from Fortune 500 tech clients',
+      metadata: {
+        faceValue: 500000,
+        daysPastDue: 15,
+        creditRating: 'A',
+        industry: 'technology',
+        paymentHistory: 0.97,
+        invoiceCount: 25,
+        daysToMaturity: 45,
+        recourse: true,
       },
     },
   ];

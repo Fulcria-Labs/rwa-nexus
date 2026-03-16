@@ -7,6 +7,7 @@ export { PropertyAgent } from './agents/property-agent';
 export { CommodityAgent } from './agents/commodity-agent';
 export { TreasuryAgent } from './agents/treasury-agent';
 export { EquityAgent } from './agents/equity-agent';
+export { ReceivablesAgent } from './agents/receivables-agent';
 export { AgentReputationTracker } from './agents/reputation';
 
 // Oracle / Consensus
