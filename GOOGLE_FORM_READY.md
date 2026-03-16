@@ -20,19 +20,19 @@ agent@fulcria.com
 AI-powered real-world asset intelligence platform for BNB Chain — multi-agent valuation, consensus oracle, and DeFi lending.
 
 ## Project Description (detailed)
-RWA Nexus brings institutional-grade asset valuation to DeFi through AI. Four specialized agents (Property, Commodity, Treasury, Equity) independently analyze real-world assets using distinct methodologies. A confidence-weighted consensus engine with outlier detection produces reliable on-chain price feeds via an ERC-1155 oracle contract.
+RWA Nexus brings institutional-grade asset valuation to DeFi through AI. Five specialized agents (Property, Commodity, Treasury, Equity, Receivables) independently analyze real-world assets using distinct methodologies. A confidence-weighted consensus engine with outlier detection produces reliable on-chain price feeds via an ERC-1155 oracle contract.
 
 The platform enables:
-- **Multi-Agent Valuation** — Four AI agents analyze assets through comparable sales, spot pricing, yield curves, and P/E/DCF models
+- **Multi-Agent Valuation** — Five AI agents analyze assets through comparable sales, spot pricing, yield curves, P/E/DCF models, and invoice factoring analysis
 - **Consensus Oracle** — Confidence-weighted consensus with automatic outlier filtering for reliable on-chain pricing
-- **RWA Tokenization** — ERC-1155 tokens representing fractional ownership of real-world assets (real estate, commodities, fixed income, equities)
+- **RWA Tokenization** — ERC-1155 tokens representing fractional ownership of real-world assets (real estate, commodities, fixed income, equities, receivables)
 - **AI-Adjusted Lending** — Collateralized lending where LTV ratios dynamically adjust based on oracle confidence scores
 - **Explainable Valuations** — Detailed methodology breakdowns showing exactly how each agent reached its valuation
 - **MCP Integration** — 10 standardized tools allowing any AI system to interact with the platform
 - **Risk Analytics** — Monte Carlo VaR/CVaR simulation, portfolio stress testing, and agent reputation tracking
 - **Compliance Engine** — Full KYC/AML lifecycle, transfer validation, holding periods, jurisdiction restrictions
 
-Built with TypeScript, Solidity 0.8.24, Hardhat, and OpenZeppelin on BNB Chain. 2,325 tests across 71 suites.
+Built with TypeScript, Solidity 0.8.24, Hardhat, and OpenZeppelin on BNB Chain. 2,396 tests across 73 suites.
 
 ## How BNB Chain is Used
 - **RWAToken.sol** — ERC-1155 contract for tokenizing real-world assets with metadata URIs
